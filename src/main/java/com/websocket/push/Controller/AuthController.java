@@ -3,10 +3,12 @@ package com.websocket.push.Controller;
 import com.websocket.push.Dto.UserReq;
 import com.websocket.push.Service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.PermitAll;
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
@@ -14,22 +16,26 @@ import javax.servlet.http.HttpServletResponse;
 public class AuthController {
     private final AuthService authService;
 
-    @RequestMapping(method = RequestMethod.POST, value = "/user")
-    public ResponseEntity login(@RequestBody UserReq userReq, HttpServletResponse response) {
+    @RequestMapping(method = RequestMethod.POST, value = "/singup")
+    public ResponseEntity signUp(@RequestBody UserReq userReq, HttpServletResponse response) {
         try {
-            System.out.println(userReq);
-            authService.addUser(userReq);
-            return new ResponseEntity(HttpStatus.ACCEPTED);
+//            if(authService.checkExistence(userReq.email)){
+//                return ResponseEntity.ok("존재하는 사용자");
+//            }
+            UserReq result = authService.addUser(userReq);
+            return ResponseEntity.ok(result);
         } catch(Exception e){
             e.printStackTrace();
-            return new ResponseEntity(HttpStatus.EXPECTATION_FAILED);
+            return ResponseEntity.ok("");
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/users")
-    public ResponseEntity login() {
+    @RequestMapping(method = RequestMethod.POST, value = "/login")
+    public ResponseEntity login(@RequestBody UserReq userReq) {
         try {
-            return new ResponseEntity(HttpStatus.ACCEPTED);
+            AccessTokenResponse response = authService.setAuth(userReq);
+            System.out.println(response);
+            return ResponseEntity.ok(response);
         } catch(Exception e){
             e.printStackTrace();
             return new ResponseEntity(HttpStatus.EXPECTATION_FAILED);
